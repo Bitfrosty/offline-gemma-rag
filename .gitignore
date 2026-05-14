@@ -1,0 +1,27 @@
+# Models
+gguf/
+*.gguf
+
+# llama.cpp build artifacts
+llama.cpp/build/
+build/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Vector DB
+chroma_db/
+
+# Logs
+*.log
+
+# Environment
+.env
+
+# VSCode
+.vscode/
+
+# Database
+*.db
