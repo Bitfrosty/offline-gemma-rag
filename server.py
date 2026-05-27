@@ -13,7 +13,7 @@ from debug_logger import get_logger
 
 logger = get_logger(__name__)
 
-LLAMA_SERVER_URL = "http://127.0.0.1:8080/v1/chat/completions"
+LLAMA_SERVER_URL = "http://127.0.0.1:11434/v1/chat/completions"
 
 DOCS_DIR = Path("./rag_docs")
 DOCS_DIR.mkdir(exist_ok=True)
@@ -125,9 +125,11 @@ User question:
         "content": final_user_prompt
     })
     payload = {
+        "model": "gemma4:e2b",
         "messages": conversation,
         "temperature": 0.7,
-        "max_tokens": 800
+        "max_tokens": 800,
+        "stream": False
     }
 
     logger.debug(f"Payload sent to llama-server: {payload}")
