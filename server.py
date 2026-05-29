@@ -128,7 +128,6 @@ User question:
         "model": "gemma4:e2b",
         "messages": conversation,
         "temperature": 0.7,
-        "max_tokens": 800,
         "stream": False
     }
 
