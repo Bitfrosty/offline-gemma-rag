@@ -354,6 +354,8 @@
 
   </main>
 
+  <script src="./vendor/marked.min.js"></script>
+
   <script>
 
     const API_URL =
@@ -874,99 +876,9 @@
       }
     }
 
-    function escapeHtml(text) {
-
-      return text
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-
     function parseMarkdown(markdown) {
 
-      let html =
-        escapeHtml(markdown);
-
-      html = html.replace(
-        /```([\s\S]*?)```/g,
-        function(match, code) {
-
-          return `
-            <pre><code>
-              ${code.trim()}
-            </code></pre>
-          `;
-        }
-      );
-
-      html = html.replace(
-        /`([^`]+)`/g,
-        "<code>$1</code>"
-      );
-
-      html = html.replace(
-        /^### (.*$)/gim,
-        "<h3>$1</h3>"
-      );
-
-      html = html.replace(
-        /^## (.*$)/gim,
-        "<h2>$1</h2>"
-      );
-
-      html = html.replace(
-        /^# (.*$)/gim,
-        "<h1>$1</h1>"
-      );
-
-      html = html.replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-      );
-
-      html = html.replace(
-        /\*(.*?)\*/g,
-        "<em>$1</em>"
-      );
-
-      html = html.replace(
-        /^> (.*$)/gim,
-        "<blockquote>$1</blockquote>"
-      );
-
-      html = html.replace(
-        /^\s*[-*] (.*)$/gim,
-        "<ul><li>$1</li></ul>"
-      );
-
-      html = html.replace(
-        /<\/ul>\s*<ul>/g,
-        ""
-      );
-
-      html = html.replace(
-        /^\s*\d+\. (.*)$/gim,
-        "<ol><li>$1</li></ol>"
-      );
-
-      html = html.replace(
-        /<\/ol>\s*<ol>/g,
-        ""
-      );
-
-      html = html.replace(
-        /\n\n/g,
-        "</p><p>"
-      );
-
-      html = html.replace(
-        /\n/g,
-        "<br>"
-      );
-
-      return `<p>${html}</p>`;
+      return marked.parse(markdown);
     }
 
     if (chats.length === 0) {
