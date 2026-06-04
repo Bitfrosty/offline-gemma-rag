@@ -1,142 +1,119 @@
 # Offline RAG AI Assistant
 
-A fully offline Retrieval-Augmented Generation (RAG) AI assistant built using Gemma 4, Ollama, FastAPI, MongoDB, and llama.cpp.
+A fully offline Retrieval-Augmented Generation AI assistant built with Ollama, Gemma 4, FastAPI, MongoDB, and a local web interface.
 
-This project provides a privacy-focused local AI environment capable of semantic document retrieval, contextual chat memory, and GPU-accelerated inference without relying on cloud APIs.
-
----
-
-# Features
-
-* Fully offline local LLM deployment
-* Retrieval-Augmented Generation (RAG)
-* Semantic vector search with embeddings
-* ChatGPT-style web interface
-* File upload and document ingestion
-* MongoDB vector storage
-* GPU acceleration with CUDA
-* Multi-session chat support
-* REST API backend with FastAPI
-* Markdown-rendered AI responses
+This project allows users to chat with a local AI model, upload documents, store embedded context, and retrieve relevant information without relying on cloud APIs.
 
 ---
 
-# Tech Stack
+## Overview
 
-## Backend
+This project is designed to run completely locally. It combines a local language model with document retrieval so the assistant can answer questions using uploaded files and stored context.
 
-* Python
-* FastAPI
-* MongoDB
-* Ollama
-* llama.cpp
+The system uses:
 
-## Frontend
-
-* HTML
-* CSS
-* JavaScript
-
-## AI / ML
-
-* Gemma 4
-* nomic-embed-text
-* Vector embeddings
-* Semantic search
-* Retrieval-Augmented Generation (RAG)
+* **Ollama / Gemma 4** for local AI responses
+* **nomic-embed-text** for generating document embeddings
+* **MongoDB** for storing embedded document chunks
+* **FastAPI** for the backend server
+* **HTML, CSS, and JavaScript** for the frontend interface
+* **Shell scripts** to simplify setup, startup, and shutdown
 
 ---
 
-# Project Architecture
+## Features
+
+* Offline AI chat interface
+* Retrieval-Augmented Generation
+* Local document ingestion
+* Semantic search using embeddings
+* MongoDB-based memory storage
+* FastAPI backend
+* ChatGPT-style frontend
+* Local setup and startup scripts
+* No cloud API required
+
+---
+
+## Project Structure
 
 ```text
-Frontend (HTML/CSS/JS)
-        │
-        ▼
-FastAPI Backend
-        │
-        ├── Ollama / llama.cpp
-        │       └── Gemma 4 Inference
-        │
-        ├── Embedding Pipeline
-        │       └── nomic-embed-text
-        │
-        └── MongoDB Vector Storage
-                └── Retrieved Context
+project-folder/
+├── setup.sh        # Installs required dependencies
+├── server.sh       # Starts the local AI model server
+├── backend.sh      # Starts the FastAPI backend
+├── mongodb.sh      # Starts MongoDB
+├── server.py       # Backend application
+├── index.html      # Main chat interface
+├── login.html      # Login page
+├── rag.py          # Embedding and retrieval logic
+├── ingest.py       # File ingestion logic
+└── README.md
 ```
 
 ---
 
-# Installation
+## Required Scripts
 
-## 1. Clone Repository
+This project uses shell scripts to manage installation and startup.
+
+### 1. Setup
+
+Run this once after cloning the repository:
 
 ```bash
-git clone <your-repo-url>
-cd <your-project-folder>
+chmod +x setup.sh
+./setup.sh
 ```
+
+The `setup.sh` script installs the required system packages, Python dependencies, Ollama models, and other project requirements.
 
 ---
 
-## 2. Install Dependencies
-
-### Ubuntu / WSL
+### 2. Start MongoDB
 
 ```bash
-sudo apt update
-sudo apt install python3 python3-pip mongodb -y
+chmod +x mongodb.sh
+./mongodb.sh
 ```
 
-### Python Packages
-
-```bash
-pip install -r requirements.txt
-```
+This starts the local MongoDB database used for storing embedded document chunks and chat-related data.
 
 ---
 
-## 3. Install Ollama
+### 3. Start the AI Model Server
 
 ```bash
-curl -fsSL https://ollama.com/install.sh | sh
+chmod +x server.sh
+./server.sh
 ```
 
-Pull the required models:
-
-```bash
-ollama pull gemma4:e2b
-ollama pull nomic-embed-text
-```
+This starts the local AI model server using Ollama or llama.cpp, depending on how the project is configured.
 
 ---
 
-## 4. Start MongoDB
+### 4. Start the Backend
 
 ```bash
-mongod
+chmod +x backend.sh
+./backend.sh
 ```
+
+This starts the FastAPI backend that connects the frontend, model server, embeddings, and MongoDB database.
 
 ---
 
-## 5. Start Ollama
+## Recommended Startup Order
+
+Run the scripts in this order:
 
 ```bash
-ollama run gemma4:e2b
+./mongodb.sh
+./server.sh
+./backend.sh
 ```
 
----
-
-## 6. Run Backend Server
-
-```bash
-python server.py
-```
-
----
-
-## 7. Open Frontend
-
-Open:
+After all three services are running, open the frontend in your browser.
 
 ```text
 http://127.0.0.1:3000
@@ -144,24 +121,56 @@ http://127.0.0.1:3000
 
 ---
 
-# RAG Pipeline
+## Stopping the Project
 
-1. Upload documents
-2. Split documents into chunks
-3. Generate embeddings
-4. Store vectors in MongoDB
-5. Retrieve relevant context
-6. Inject context into model prompt
-7. Generate response
+Stop each running service from its terminal window using:
+
+```bash
+Ctrl + C
+```
 
 ---
 
-# Why Offline AI?
+## How It Works
 
-This project was designed to provide:
+1. The user uploads or adds documents.
+2. Documents are split into smaller text chunks.
+3. Each chunk is converted into an embedding.
+4. Embeddings and text chunks are stored in MongoDB.
+5. When the user asks a question, the backend searches for relevant chunks.
+6. Retrieved context is added to the AI prompt.
+7. The local model generates a response using the retrieved context.
 
-* Full data privacy
-* No cloud dependency
-* Lower operational cost
-* Local document processing
+---
+
+## RAG Pipeline
+
+```text
+User Question
+     ↓
+FastAPI Backend
+     ↓
+Embedding Search
+     ↓
+MongoDB Context Retrieval
+     ↓
+Prompt Construction
+     ↓
+Local Gemma 4 Model
+     ↓
+AI Response
+```
+
+---
+
+## Why This Project Is Offline
+
+This project is built to run without cloud AI APIs. That means uploaded documents, prompts, embeddings, and generated responses remain on the local machine.
+
+Benefits include:
+
+* Better privacy
+* No API costs
+* Local control over models and data
+* Ability to run without internet after setup
 * Customizable AI infrastructure
