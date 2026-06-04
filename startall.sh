@@ -1,11 +1,14 @@
-#!/usr/bin/env bash
+#!/bin/bash
+
+mkdir -p ./pids
 
 ./mongodb.sh &
-echo $! > mongodb.pid
+echo $! > ./pids/mongodb.pid
 
 ./backend.sh &
-echo $! > backend.pid
+echo $! > ./pids/backend.pid
 
-./server.sh
+./server.sh &
+echo $! > ./pids/server.pid
 
-wait
+echo "All services started."

@@ -1,11 +1,18 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-echo "Stopping services..."
+for pidfile in ./pids/*.pid; do
+  [ -e "$pidfile" ] || continue
 
-kill $(cat mongodb.pid)
-kill $(cat backend.pid)
-kill $(cat llama.pid)
+  pid=$(cat "$pidfile")
 
-rm *.pid
+  if kill -0 "$pid" 2>/dev/null; then
+    echo "Stopping process $pid..."
+    kill "$pid"
+  else
+    echo "Process $pid is not running."
+  fi
 
-echo "All services stopped."
+  rm "$pidfile"
+done
+
+echo "Shutdown complete."
