@@ -11,7 +11,9 @@ sudo apt install -y \
     git \
     curl \
     build-essential
-
+sudo apt install -y ca-certificates curl gnupg
+sudo update-ca-certificates
+	
 echo "Installing Ollama..."
 curl -fsSL https://ollama.com/install.sh | sh
 
