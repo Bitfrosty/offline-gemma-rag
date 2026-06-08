@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | Local MIND</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background: #212121;
+      color: #ececec;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      background: #171717;
+      border: 1px solid #2f2f2f;
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+
+    .logo {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #19a37f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin: 0 auto 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #aaa;
+      margin-bottom: 28px;
+      font-size: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #d0d0d0;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      background: #2f2f2f;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 10px;
+      padding: 13px;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    input:focus {
+      border-color: #19a37f;
+    }
+
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 10px;
+      padding: 13px;
+      background: white;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+      margin-top: 4px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    .error {
+      display: none;
+      background: rgba(255, 80, 80, 0.12);
+      border: 1px solid rgba(255, 80, 80, 0.35);
+      color: #ffb4b4;
+      border-radius: 10px;
+      padding: 10px;
+      font-size: 14px;
+      margin-bottom: 16px;
+    }
+
+    .switch-page {
+      text-align: center;
+      margin-top: 22px;
+      color: #aaa;
+      font-size: 14px;
+    }
+
+    .switch-page a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .switch-page a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-card">
+    <div class="logo">AI</div>
+
+    <h1>Welcome back</h1>
+    <div class="subtitle">Log in to Local MIND</div>
+
+    <div id="errorBox" class="error"></div>
+
+    <form id="loginForm">
+      <label for="username">Username</label>
+      <input id="username" autocomplete="username" required />
+
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" required />
+
+      <button type="submit">Log in</button>
+    </form>
+
+    <div class="switch-page">
+      Don&apos;t have an account?
+      <a href="./signup.html">Sign up</a>
+    </div>
+  </div>
+
+  <script>
+    const loginForm = document.getElementById("loginForm");
+    const errorBox = document.getElementById("errorBox");
+
+    function showError(message) {
+      errorBox.textContent = message;
+      errorBox.style.display = "block";
+    }
+
+    loginForm.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+
+      const users = JSON.parse(localStorage.getItem("local_mind_users")) || [];
+
+      const user = users.find(account =>
+        account.username === username &&
+        account.password === password
+      );
+
+      if (!user) {
+        showError("Invalid username or password.");
+        return;
+      }
+
+      localStorage.setItem(
+        "current_user",
+        JSON.stringify({ username: user.username })
+      );
+
+      window.location.href = "./index.html";
+    });
+  </script>
+</body>
+</html>
