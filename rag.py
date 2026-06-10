@@ -55,20 +55,35 @@ def cosine_similarity(a: list[float], b: list[float]) -> float:
     )
 
 
-def retrieve_context(query: str, chat_id: str, top_k: int = 5) -> list[str]:
-    logger.info(f"Retrieving context for query: {query}")
+def retrieve_context(
+    query: str,
+    user_id: str,
+    chat_id: str | None = None,
+    top_k: int = 5
+) -> list[str]:
+
+    logger.info(f"Retrieving context for user_id={user_id}, chat_id={chat_id}")
 
     query_embedding = embed_text(query)
 
+    mongo_filter = {
+        "user_id": user_id
+    }
+
+    # Optional: only use files from this chat
+    if chat_id:
+        mongo_filter["chat_id"] = chat_id
+
     docs = list(collection.find(
-        {"chat_id": chat_id},
+        mongo_filter,
         {
             "_id": 0,
             "text": 1,
             "embedding": 1,
             "source": 1,
             "chunk_index": 1,
-            "chat_id": 1
+            "chat_id": 1,
+            "user_id": 1
         }
     ))
 
@@ -77,10 +92,7 @@ def retrieve_context(query: str, chat_id: str, top_k: int = 5) -> list[str]:
     scored_docs = []
 
     for doc in docs:
-        score = cosine_similarity(
-            query_embedding,
-            doc["embedding"]
-        )
+        score = cosine_similarity(query_embedding, doc["embedding"])
 
         scored_docs.append({
             "text": doc["text"],
@@ -98,12 +110,5 @@ def retrieve_context(query: str, chat_id: str, top_k: int = 5) -> list[str]:
         doc for doc in scored_docs[:top_k]
         if doc["score"] >= 0.50
     ]
-
-    logger.info(f"Relevant chunks found: {len(relevant_docs)}")
-
-    for doc in relevant_docs:
-        logger.debug(
-            f"Score={doc['score']} Source={doc['source']} Chunk={doc['chunk_index']}"
-        )
 
     return [doc["text"] for doc in relevant_docs]

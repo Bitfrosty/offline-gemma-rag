@@ -37,6 +37,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatRequest(BaseModel):
+    user_id: str
     chat_id: str
     message: str
     messages: list[ChatMessage] = []
@@ -159,6 +160,7 @@ User question:
 @app.post("/upload")
 async def upload_file(
     file: UploadFile = File(...),
+    user_id: str = Form(...),
     chat_id: str = Form(...)
 ):
     logger.info(f"Upload request received: {file.filename}")
@@ -167,24 +169,26 @@ async def upload_file(
         suffix = Path(file.filename).suffix.lower()
 
         if suffix not in ALLOWED_EXTENSIONS:
-            logger.warning(f"Rejected unsupported file type: {suffix}")
-
             return {
                 "success": False,
                 "error": f"Unsupported file type: {suffix}"
             }
 
         safe_name = Path(file.filename).name
-        file_path = DOCS_DIR / safe_name
 
-        logger.debug(f"Saving uploaded file to: {file_path}")
+        user_docs_dir = DOCS_DIR / user_id
+        user_docs_dir.mkdir(parents=True, exist_ok=True)
+
+        file_path = user_docs_dir / safe_name
 
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
-        chunks_added = ingest_file(file_path, chat_id)
-
-        logger.info(f"Uploaded and embedded {safe_name}. Chunks added: {chunks_added}")
+        chunks_added = ingest_file(
+            file_path,
+            user_id,
+            chat_id
+        )
 
         return {
             "success": True,
@@ -205,16 +209,14 @@ async def upload_file(
 @app.post("/chat")
 def chat(request: ChatRequest):
     logger.info("Chat request received")
-    logger.debug(f"Incoming chat message: {request.message}")
 
     try:
         context_chunks = retrieve_context(
             request.message,
+            request.user_id,
             request.chat_id,
             top_k=5
         )
-
-        logger.debug(f"Retrieved context chunks: {context_chunks}")
 
         answer = call_gemma(
             request.message,
@@ -228,19 +230,14 @@ def chat(request: ChatRequest):
         }
 
     except requests.exceptions.RequestException as error:
-        logger.exception("Error connecting to llama-server")
-
         return {
             "answer": f"Error connecting to llama-server: {str(error)}"
         }
 
     except Exception as error:
-        logger.exception("Backend error during chat request")
-
         return {
             "answer": f"Backend error: {str(error)}"
         }
-
 
 @app.post("/debug")
 def debug_from_frontend(request: DebugRequest):

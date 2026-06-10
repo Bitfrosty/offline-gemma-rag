@@ -38,15 +38,13 @@ def chunk_text(text: str, chunk_size: int = 1000, overlap: int = 200) -> list[st
     return chunks
 
 
-def ingest_file(path: Path, chat_id: str):
+def ingest_file(path: Path, user_id: str, chat_id: str):
     logger.info(f"Starting ingestion for: {path}")
 
     if not path.exists():
-        logger.error(f"File does not exist: {path}")
         raise FileNotFoundError(f"{path} does not exist")
 
     if path.suffix.lower() not in ALLOWED_EXTENSIONS:
-        logger.error(f"Unsupported file type: {path.suffix}")
         raise ValueError(f"Unsupported file type: {path.suffix}")
 
     text = read_file(path)
@@ -55,12 +53,11 @@ def ingest_file(path: Path, chat_id: str):
     documents = []
 
     for index, chunk in enumerate(chunks):
-        logger.debug(f"Embedding chunk {index} from {path.name}")
-
         embedding = embed_text(chunk)
 
         documents.append({
             "chunk_id": str(uuid.uuid4()),
+            "user_id": user_id,
             "chat_id": chat_id,
             "text": chunk,
             "embedding": embedding,
@@ -71,9 +68,6 @@ def ingest_file(path: Path, chat_id: str):
 
     if documents:
         collection.insert_many(documents)
-        logger.info(f"Inserted {len(documents)} chunks from {path.name}")
-    else:
-        logger.warning(f"No chunks created for {path.name}")
 
     return len(documents)
 
@@ -91,7 +85,7 @@ def ingest_documents():
         return
 
     for path in files:
-        chunks_added = ingest_file(path, "global")
+        chunks_added = ingest_file(path, "global", "global")
         logger.info(f"Added {chunks_added} chunks from {path.name}")
 
     logger.info("Ingestion complete")

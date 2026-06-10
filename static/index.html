@@ -429,9 +429,15 @@
     const fileInput =
       document.getElementById("fileInput");
 
+    const currentUserId = localStorage.getItem("user_id");
+
+    if (!currentUserId) {
+      window.location.href = "./login.html";
+    }
+
     let chats =
       JSON.parse(
-        localStorage.getItem(CHAT_STORAGE_KEY)
+        localStorage.getItem(`offline_chats_${currentUserId}`)
       ) || [];
 
     let activeChatId =
@@ -454,16 +460,15 @@
     function saveChats() {
 
       localStorage.setItem(
-        CHAT_STORAGE_KEY,
+        `offline_chats_${currentUserId}`,
         JSON.stringify(chats)
       );
 
       localStorage.setItem(
-        ACTIVE_CHAT_STORAGE_KEY,
+        `active_chat_id_${currentUserId}`,
         activeChatId
       );
     }
-
     function createNewChat() {
 
       const chat = {
@@ -768,7 +773,7 @@
             },
 
             body: JSON.stringify({
-              user_id: currentUser.username,
+              user_id: localStorage.getItem("user_id"),
               chat_id: chat.id,
               message: text,
               messages: chat.messages
@@ -872,7 +877,7 @@
 
       formData.append(
         "user_id",
-        currentUser.username
+        localStorage.getItem("user_id")
       );
 
       formData.append(
