@@ -40,13 +40,18 @@ The system uses:
 ```text
 project-folder/
 ├── setup.sh        # Installs required dependencies
+├── startall.sh     # Starts all the processes required for the model
+├── shutdownall.sh  # Shuts down all the processes the model is running
 ├── server.sh       # Starts the local AI model server
 ├── backend.sh      # Starts the FastAPI backend
 ├── mongodb.sh      # Starts MongoDB
 ├── server.py       # Backend application
-├── index.html      # Main chat interface
-├── login.html      # Login page
+├── static          # Folder storing frontend pages
+     └── index.html      # Main chat interface
+     └── login.html      # Login page
+     └── signup.html     # User signup page
 ├── rag.py          # Embedding and retrieval logic
+├── rag_docs        # Folder storing files uploaded for rag
 ├── ingest.py       # File ingestion logic
 └── README.md
 ```
@@ -62,7 +67,6 @@ This project uses shell scripts to manage installation and startup.
 Run this once after cloning the repository:
 
 ```bash
-chmod +x setup.sh
 ./setup.sh
 ```
 
@@ -73,7 +77,6 @@ The `setup.sh` script installs the required system packages, Python dependencies
 ### 2. Start MongoDB
 
 ```bash
-chmod +x mongodb.sh
 ./mongodb.sh
 ```
 
@@ -84,7 +87,6 @@ This starts the local MongoDB database used for storing embedded document chunks
 ### 3. Start the AI Model Server
 
 ```bash
-chmod +x server.sh
 ./server.sh
 ```
 
@@ -95,7 +97,6 @@ This starts the local AI model server using Ollama or llama.cpp, depending on ho
 ### 4. Start the Backend
 
 ```bash
-chmod +x backend.sh
 ./backend.sh
 ```
 
@@ -113,6 +114,12 @@ Run the scripts in this order:
 ./backend.sh
 ```
 
+Or run a single script:
+
+```bash
+./startall.sh
+```
+
 After all three services are running, open the frontend in your browser.
 
 ```text
@@ -126,7 +133,7 @@ http://127.0.0.1:3000
 Stop each running service from its terminal window using:
 
 ```bash
-Ctrl + C
+./shutdownall.sh
 ```
 
 ---
