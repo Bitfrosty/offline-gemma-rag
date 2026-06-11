@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Local MIND</title>
 
+  <script>
+    const loggedInUser = JSON.parse(
+      localStorage.getItem("current_user")
+    );
+
+    if (!loggedInUser || !loggedInUser.username) {
+      window.location.href = "./login.html";
+    }
+  </script>
+
   <style>
 
     * {
