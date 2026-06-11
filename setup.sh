@@ -34,7 +34,7 @@ sudo apt update
 sudo apt install -y mongodb-org
 
 echo "Creating MongoDB data directory..."
-mkdir -p ~/mongodb-data
+mkdir -p ./mongodb-data
 
 echo "Creating Python virtual environment..."
 python3 -m venv venv
