@@ -161,12 +161,14 @@
 
     loginForm.addEventListener("submit", function(event) {
       event.preventDefault();
+      console.log("Starting login...");
 
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
 
       const users = JSON.parse(localStorage.getItem("local_mind_users")) || [];
 
+      console.log("Finding account");
       const user = users.find(account =>
         account.username === username &&
         account.password === password
@@ -177,6 +179,7 @@
         return;
       }
 
+      console.log("Setting user");
       localStorage.setItem(
         "current_user",
         JSON.stringify({ username: user.username })
