@@ -143,7 +143,20 @@
     }
 
     .avatar {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
       overflow: hidden;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      font-size: 11px;
+      font-weight: bold;
+      color: white;
+      flex-shrink: 0;
     }
 
     .avatar img {
@@ -151,6 +164,7 @@
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
+      display: block;
     }
 
     .user .avatar {

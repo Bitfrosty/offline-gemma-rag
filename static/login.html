@@ -189,13 +189,22 @@
       }
 
       console.log("Setting user");
+
+      // Store the logged-in user object used by index.html's first auth check.
       localStorage.setItem(
         "current_user",
         JSON.stringify({ username: user.username })
       );
 
+      // Store the user_id key that index.html expects later.
+      // If the signup flow created a real id, use it; otherwise fall back to username.
+      localStorage.setItem(
+        "user_id",
+        user.id || user.username
+      );
+
       console.log("Login successful");
-      window.location.replace("./index.html");
+      window.location.href = "./index.html";
     });
   </script>
 </body>
