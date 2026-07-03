@@ -993,12 +993,16 @@
           });
 
           if (!response.ok) {
+            pendingFiles = [];
+            renderPendingFiles();
             throw new Error(`Server error: ${response.status}`);
           }
 
           const data = await response.json();
 
           if (!data.success) {
+            pendingFiles = [];
+            renderPendingFiles();
             throw new Error(data.error || "Upload failed");
           }
 
