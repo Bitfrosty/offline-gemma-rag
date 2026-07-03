@@ -150,6 +150,15 @@ Stop each running service from its terminal window using:
 
 ---
 
+## Getting Started Guide
+
+To begin using this application, please follow these steps:
+
+1.  **Create an Account:** For a first-time login, please navigate to the [signup page](path/to/signup.html) and create a new account using a secure username and password.
+2.  **Login:** Once registered, you can access the main application via the [login page](path/to/login.html).
+
+---
+
 ## RAG Pipeline
 
 ```text
