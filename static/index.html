@@ -241,6 +241,21 @@
       background: #263f37;
     }
 
+    .pending-files {
+      max-width: 850px;
+      margin: 8px auto 0;
+      color: #aaa;
+      font-size: 13px;
+    }
+
+    .pending-file {
+      background: #2f2f2f;
+      border: 1px solid #444;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-top: 6px;
+    }
+
     textarea {
       flex: 1;
       resize: none;
@@ -390,7 +405,10 @@
           id="fileInput"
           style="display: none;"
           accept=".txt,.md,.cpp,.h,.py,.json"
+          multiple
         />
+
+        <div id="pendingFiles" class="pending-files"></div>
 
         <button
           class="upload"
@@ -408,7 +426,7 @@
         <button
           id="sendButton"
           class="send"
-          onclick="sendMessage()"
+          onclick="handleSend()"
         >
           Send
         </button>
@@ -513,6 +531,15 @@
 
       renderChatList();
       renderMessages();
+    }
+
+    async function handleSend() {
+
+      if (pendingFiles.length > 0) {
+        await uploadSelectedFile();
+      }
+
+      await sendMessage();
     }
 
     function getActiveChat() {
@@ -864,9 +891,17 @@
       fileInput.click();
     }
 
+    let pendingFiles = [];
+
+    const pendingFilesDiv =
+      document.getElementById("pendingFiles");
+
     fileInput.addEventListener(
       "change",
-      uploadSelectedFile
+      function() {
+        addPendingFiles(fileInput.files);
+        fileInput.value = "";
+      }
     );
 
     const dropZone =
@@ -893,96 +928,88 @@
         event.preventDefault();
         dropZone.classList.remove("drag-over");
 
-        if (!event.dataTransfer.files.length) {
-          return;
-        }
-
-        fileInput.files =
-          event.dataTransfer.files;
-
-        uploadSelectedFile();
+        addPendingFiles(event.dataTransfer.files);
       }
     );
 
+    function addPendingFiles(files) {
+      for (const file of files) {
+        pendingFiles.push(file);
+      }
+
+      renderPendingFiles();
+    }
+
+    function renderPendingFiles() {
+      pendingFilesDiv.innerHTML = "";
+
+      pendingFiles.forEach(file => {
+        const item = document.createElement("div");
+        item.className = "pending-file";
+        item.textContent = file.name;
+        pendingFilesDiv.appendChild(item);
+      });
+    }
+
     async function uploadSelectedFile() {
 
-      if (!fileInput.files.length) {
+      if (!pendingFiles.length) {
         return;
       }
 
-      const file =
-        fileInput.files[0];
-
-      let chat =
-        getActiveChat();
+      let chat = getActiveChat();
 
       if (!chat) {
-
         createNewChat();
-
-        chat =
-          getActiveChat();
+        chat = getActiveChat();
       }
 
       addMessageToScreen(
         "user",
-        `Uploading file: ${file.name}`
+        `Uploading ${pendingFiles.length} file(s)...`
       );
 
       const assistantMessage =
         addMessageToScreen(
           "assistant",
-          "Embedding file into RAG database..."
+          "Embedding files into RAG database..."
         );
 
-      const formData =
-        new FormData();
-
-      formData.append(
-        "file",
-        file
-      );
-
-      formData.append(
-        "user_id",
-        localStorage.getItem("user_id")
-      );
-
-      formData.append(
-        "chat_id",
-        chat.id
-      );
+      const results = [];
 
       try {
 
-        const response =
-          await fetch(UPLOAD_URL, {
+        for (const file of pendingFiles) {
+
+          const formData = new FormData();
+
+          formData.append("file", file);
+          formData.append("user_id", localStorage.getItem("user_id"));
+          formData.append("chat_id", chat.id);
+
+          const response = await fetch(UPLOAD_URL, {
             method: "POST",
             body: formData
           });
 
-        if (!response.ok) {
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
+          }
 
-          throw new Error(
-            `Server error: ${response.status}`
-          );
-        }
+          const data = await response.json();
 
-        const data =
-          await response.json();
+          if (!data.success) {
+            throw new Error(data.error || "Upload failed");
+          }
 
-        if (!data.success) {
-
-          throw new Error(
-            data.error ||
-            "Upload failed"
+          results.push(
+            `File: ${data.filename}\nChunks Added: ${data.chunks_added}`
           );
         }
 
         const successMessage =
-          `File embedded successfully.\n\n` +
-          `File: ${data.filename}\n` +
-          `Chunks Added: ${data.chunks_added}`;
+          `Files embedded successfully.\n\n` +
+          results.join("\n\n---\n\n");
 
         assistantMessage.innerHTML =
           parseMarkdown(successMessage);
@@ -992,6 +1019,8 @@
           content: successMessage
         });
 
+        pendingFiles = [];
+        renderPendingFiles();
         saveChats();
 
       } catch (error) {
@@ -1010,9 +1039,6 @@
         saveChats();
 
       } finally {
-
-        fileInput.value = "";
-
         scrollToBottom();
       }
     }

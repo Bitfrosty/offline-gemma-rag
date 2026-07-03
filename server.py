@@ -10,15 +10,13 @@ import requests
 from rag import retrieve_context
 from ingest import ingest_file
 from debug_logger import get_logger
+from config import DOCS_DIR, ALLOWED_EXTENSIONS
 
 logger = get_logger(__name__)
 
 LLAMA_SERVER_URL = "http://127.0.0.1:11434/v1/chat/completions"
 
-DOCS_DIR = Path("./rag_docs")
-DOCS_DIR.mkdir(exist_ok=True)
-
-ALLOWED_EXTENSIONS = {".txt", ".md", ".cpp", ".h", ".py", ".json"}
+from config import DOCS_DIR, ALLOWED_EXTENSIONS
 
 app = FastAPI()
 

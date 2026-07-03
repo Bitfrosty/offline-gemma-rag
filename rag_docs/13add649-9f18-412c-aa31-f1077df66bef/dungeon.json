@@ -3,173 +3,117 @@
   "rooms": [
     {
       "id": "entrance",
-      "name": "Dungeon Entrance",
-      "description": "Cold air flows from the tunnels ahead. The way back has sealed behind you.",
+      "name": "Prison Entrance",
+      "description": "A cracked stairway descends into the ancient underground prison.",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
       "connections": {
         "north": "guard_hall",
-        "east": "storage_room",
-        "west": "collapsed_passage"
+        "east": "storage_cell"
       },
       "events": [
         {
           "type": "Dialogue",
-          "data": "A stone door slams shut behind you. You must find another way out."
+          "data": "The stone door seals shut behind you. Somewhere below, an escape tunnel waits."
         }
       ]
     },
     {
       "id": "guard_hall",
       "name": "Guard Hall",
-      "description": "Broken weapons and old shields line the walls.",
+      "description": "Rusty chains hang from the walls where skeletal guards still patrol.",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
       "connections": {
         "south": "entrance",
-        "north": "throne_room",
-        "east": "armory",
-        "west": "prison_cells"
+        "east": "warden_chamber",
+        "west": "bone_pit"
       },
       "events": [
         {
           "type": "Enemy",
-          "data": "skeleton"
+          "data": "skeleton_guard"
         }
       ]
     },
     {
-      "id": "storage_room",
-      "name": "Storage Room",
-      "description": "Rotten crates are stacked against the walls. Something useful may have been left behind.",
+      "id": "storage_cell",
+      "name": "Storage Cell",
+      "description": "Broken crates and forgotten supplies fill this damp prison cell.",
+      "position": {
+        "x": 1,
+        "y": 0
+      },
       "connections": {
         "west": "entrance",
-        "north": "armory"
+        "north": "warden_chamber"
       },
       "events": [
         {
           "type": "Treasure",
-          "data": "potion"
+          "data": "rusted_key"
         }
       ]
     },
     {
-      "id": "collapsed_passage",
-      "name": "Collapsed Passage",
-      "description": "The ceiling has partially fallen in, but a narrow path continues through the rubble.",
-      "connections": {
-        "east": "entrance",
-        "north": "prison_cells"
+      "id": "bone_pit",
+      "name": "Bone Pit",
+      "description": "A pit of old bones covers the floor, hiding pressure plates beneath.",
+      "position": {
+        "x": -1,
+        "y": 1
       },
-      "events": [
-        {
-          "type": "Trap",
-          "data": "4"
-        }
-      ]
-    },
-    {
-      "id": "armory",
-      "name": "Armory",
-      "description": "Rusty blades and cracked shields are scattered across the floor.",
-      "connections": {
-        "west": "guard_hall",
-        "south": "storage_room",
-        "north": "library",
-        "east": "treasure_vault"
-      },
-      "events": [
-        {
-          "type": "Treasure",
-          "data": "Ounce of Silver"
-        }
-      ]
-    },
-    {
-      "id": "prison_cells",
-      "name": "Prison Cells",
-      "description": "Empty cells line the walls. Chains sway gently despite the still air.",
       "connections": {
         "east": "guard_hall",
-        "south": "collapsed_passage",
-        "north": "crypt"
-      },
-      "events": [
-        {
-          "type": "Dialogue",
-          "data": "Scratched into the wall are the words: The crown marks the path to freedom."
-        }
-      ]
-    },
-    {
-      "id": "throne_room",
-      "name": "Ruined Throne Room",
-      "description": "A cracked stone throne sits beneath a torn banner.",
-      "connections": {
-        "south": "guard_hall",
-        "east": "library",
-        "west": "crypt"
-      },
-      "events": [
-        {
-          "type": "Enemy",
-          "data": "ogre"
-        }
-      ]
-    },
-    {
-      "id": "library",
-      "name": "Ancient Library",
-      "description": "Dusty bookshelves surround a glowing carving of a doorway.",
-      "connections": {
-        "west": "throne_room",
-        "south": "armory",
-        "east": "exit"
-      },
-      "events": [
-        {
-          "type": "Dialogue",
-          "data": "One book lies open: Only those who explore beyond the obvious path may escape."
-        }
-      ]
-    },
-    {
-      "id": "crypt",
-      "name": "Forgotten Crypt",
-      "description": "Stone coffins rest in silence. A cold mist covers the floor.",
-      "connections": {
-        "south": "prison_cells",
-        "east": "throne_room",
-        "north": "treasure_vault"
-      },
-      "events": [
-        {
-          "type": "Enemy",
-          "data": "skeleton"
-        }
-      ]
-    },
-    {
-      "id": "treasure_vault",
-      "name": "Treasure Vault",
-      "description": "Gold glitters in the torchlight. A hidden passage leads away from the vault.",
-      "connections": {
-        "west": "armory",
-        "south": "crypt",
         "north": "exit"
       },
       "events": [
         {
-          "type": "Treasure",
-          "data": "Gold Crown"
+          "type": "Trap",
+          "data": "10"
+        }
+      ]
+    },
+    {
+      "id": "warden_chamber",
+      "name": "Warden Chamber",
+      "description": "The ruined office of the prison warden contains a passage carved behind a shelf.",
+      "position": {
+        "x": 1,
+        "y": 1
+      },
+      "connections": {
+        "west": "guard_hall",
+        "south": "storage_cell",
+        "north": "exit"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "skeleton_warden"
         }
       ]
     },
     {
       "id": "exit",
       "name": "Hidden Escape Tunnel",
-      "description": "Fresh air rushes through a narrow tunnel leading outside.",
-      "connections": {},
+      "description": "A narrow tunnel leads upward toward cold night air and freedom.",
+      "position": {
+        "x": 0,
+        "y": 2
+      },
+      "connections": {
+        "south": "bone_pit",
+        "east": "warden_chamber"
+      },
       "events": [
         {
           "type": "Dialogue",
-          "data": "You see moonlight ahead."
+          "data": "You crawl through the hidden escape tunnel and leave the prison behind."
         }
       ]
     }

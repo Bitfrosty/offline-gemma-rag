@@ -1,0 +1,119 @@
+{
+  "startRoomId": "cell_block",
+  "rooms": [
+    {
+      "id": "cell_block",
+      "name": "Cell Block",
+      "description": "Rows of broken prison cells line the damp stone walls.",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "connections": {
+        "north": "guard_hall",
+        "east": "chain_vault"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "The rusted cell doors hang open. Somewhere ahead, air moves through hidden cracks."
+        }
+      ]
+    },
+    {
+      "id": "guard_hall",
+      "name": "Guard Hall",
+      "description": "A ruined guard post filled with cracked shields and scattered bones.",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
+      "connections": {
+        "south": "cell_block",
+        "east": "torture_chamber",
+        "west": "bone_pit"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "skeleton_guard"
+        }
+      ]
+    },
+    {
+      "id": "bone_pit",
+      "name": "Bone Pit",
+      "description": "A collapsed chamber where old prisoners were thrown and forgotten.",
+      "position": {
+        "x": -1,
+        "y": 1
+      },
+      "connections": {
+        "east": "guard_hall"
+      },
+      "events": [
+        {
+          "type": "Trap",
+          "data": "10"
+        }
+      ]
+    },
+    {
+      "id": "torture_chamber",
+      "name": "Torture Chamber",
+      "description": "Broken chains hang from the ceiling above a stained stone floor.",
+      "position": {
+        "x": 1,
+        "y": 1
+      },
+      "connections": {
+        "west": "guard_hall",
+        "south": "chain_vault",
+        "east": "exit"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "bone_jailer"
+        }
+      ]
+    },
+    {
+      "id": "chain_vault",
+      "name": "Chain Vault",
+      "description": "A hidden storage room packed with rusted shackles, old coins, and prison keys.",
+      "position": {
+        "x": 1,
+        "y": 0
+      },
+      "connections": {
+        "west": "cell_block",
+        "north": "torture_chamber"
+      },
+      "events": [
+        {
+          "type": "Treasure",
+          "data": "rusted_escape_key"
+        }
+      ]
+    },
+    {
+      "id": "exit",
+      "name": "Hidden Escape Tunnel",
+      "description": "A narrow tunnel slopes upward toward moonlit air and freedom.",
+      "position": {
+        "x": 2,
+        "y": 1
+      },
+      "connections": {
+        "west": "torture_chamber"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "You found the hidden escape tunnel. Freedom lies just beyond the darkness."
+        }
+      ]
+    }
+  ]
+}
