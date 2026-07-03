@@ -236,6 +236,11 @@
       gap: 10px;
     }
 
+    .input-wrapper.drag-over {
+      border-color: #19a37f;
+      background: #263f37;
+    }
+
     textarea {
       flex: 1;
       resize: none;
@@ -378,7 +383,7 @@
 
     <div class="input-area">
 
-      <div class="input-wrapper">
+      <div id="dropZone" class="input-wrapper">
 
         <input
           type="file"
@@ -862,6 +867,41 @@
     fileInput.addEventListener(
       "change",
       uploadSelectedFile
+    );
+
+    const dropZone =
+      document.getElementById("dropZone");
+
+    dropZone.addEventListener(
+      "dragover",
+      function(event) {
+        event.preventDefault();
+        dropZone.classList.add("drag-over");
+      }
+    );
+
+    dropZone.addEventListener(
+      "dragleave",
+      function() {
+        dropZone.classList.remove("drag-over");
+      }
+    );
+
+    dropZone.addEventListener(
+      "drop",
+      function(event) {
+        event.preventDefault();
+        dropZone.classList.remove("drag-over");
+
+        if (!event.dataTransfer.files.length) {
+          return;
+        }
+
+        fileInput.files =
+          event.dataTransfer.files;
+
+        uploadSelectedFile();
+      }
     );
 
     async function uploadSelectedFile() {
