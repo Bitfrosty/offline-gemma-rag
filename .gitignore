@@ -10,6 +10,7 @@ build/
 __pycache__/
 *.pyc
 venv/
+.venv/
 
 # Vector DB
 chroma_db/
