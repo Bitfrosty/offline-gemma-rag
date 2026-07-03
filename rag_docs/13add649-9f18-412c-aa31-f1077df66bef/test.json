@@ -1,0 +1,86 @@
+{
+  "startRoomId": "prison_entrance",
+  "rooms": [
+    {
+      "id": "prison_entrance",
+      "name": "Prison Entrance",
+      "description": "A cracked stairway descends into an ancient underground prison sealed by rusted iron bars.",
+      "connections": {
+        "north": "guard_hall",
+        "east": "storage_cell"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "The air is cold and stale. Somewhere deep below, bones scrape against stone."
+        }
+      ]
+    },
+    {
+      "id": "guard_hall",
+      "name": "Guard Hall",
+      "description": "Broken spears, old chains, and shattered shields litter the floor of this ruined guard post.",
+      "connections": {
+        "south": "prison_entrance",
+        "east": "bone_chamber",
+        "west": "storage_cell"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "skeleton_guard"
+        }
+      ]
+    },
+    {
+      "id": "storage_cell",
+      "name": "Storage Cell",
+      "description": "Rotten crates and forgotten supplies are stacked against the damp stone walls.",
+      "connections": {
+        "west": "prison_entrance",
+        "east": "guard_hall",
+        "north": "bone_chamber"
+      },
+      "events": [
+        {
+          "type": "Treasure",
+          "data": "rusted_key"
+        }
+      ]
+    },
+    {
+      "id": "bone_chamber",
+      "name": "Bone Chamber",
+      "description": "Piles of bones cover the floor, hiding pressure plates beneath the dust.",
+      "connections": {
+        "west": "guard_hall",
+        "south": "storage_cell",
+        "north": "exit"
+      },
+      "events": [
+        {
+          "type": "Trap",
+          "data": "10"
+        },
+        {
+          "type": "Enemy",
+          "data": "bone_walker"
+        }
+      ]
+    },
+    {
+      "id": "exit",
+      "name": "Hidden Escape Tunnel",
+      "description": "A narrow tunnel behind a loose stone wall leads upward toward fresh air and freedom.",
+      "connections": {
+        "south": "bone_chamber"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "You have found the hidden escape tunnel. Freedom is within reach."
+        }
+      ]
+    }
+  ]
+}
