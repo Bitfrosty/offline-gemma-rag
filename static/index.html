@@ -478,11 +478,8 @@
     const ACTIVE_CHAT_STORAGE_KEY =
       `active_chat_id_${currentUser.username}`;
 
-    const API_URL =
-      "http://127.0.0.1:3000/chat";
-
-    const UPLOAD_URL =
-      "http://127.0.0.1:3000/upload";
+    const API_URL = "/chat";
+    const UPLOAD_URL = "/upload";
 
     const fileInput =
       document.getElementById("fileInput");
@@ -530,7 +527,7 @@
     function createNewChat() {
 
       const chat = {
-        id: crypto.randomUUID(),
+        id: Date.now().toString() + "-" + Math.random().toString(36).slice(2),
         title: "New Chat",
         messages: []
       };
@@ -879,7 +876,7 @@
       } catch (error) {
 
         const errorMessage =
-          "Could not connect to the RAG backend.";
+          `Could not connect to the RAG backend.\n\n${error.message}`;
 
         assistantContent.textContent =
           errorMessage;
@@ -890,7 +887,6 @@
         });
 
         saveChats();
-
       } finally {
 
         sendButton.disabled = false;
