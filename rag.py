@@ -108,7 +108,7 @@ def retrieve_context(
 
     relevant_docs = [
         doc for doc in scored_docs[:top_k]
-        if doc["score"] >= 0.50
+        if doc["score"] >= 0.30
     ]
 
     return [doc["text"] for doc in relevant_docs]
