@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from pathlib import Path
 import shutil
 import requests
+from server_config import OLLAMA_HOST, DEFAULT_OLLAMA_MODEL
 
 from rag import retrieve_context
 from ingest import ingest_file
@@ -15,8 +16,6 @@ from config import DOCS_DIR, ALLOWED_EXTENSIONS
 logger = get_logger(__name__)
 
 LLAMA_SERVER_URL = "http://127.0.0.1:11434/v1/chat/completions"
-
-from config import DOCS_DIR, ALLOWED_EXTENSIONS
 
 app = FastAPI()
 
@@ -38,6 +37,7 @@ class ChatRequest(BaseModel):
     user_id: str
     chat_id: str
     message: str
+    model: str = DEFAULT_OLLAMA_MODEL
     messages: list[ChatMessage] = []
 
 
@@ -49,7 +49,8 @@ class DebugRequest(BaseModel):
 def call_gemma(
     user_message: str,
     context_chunks: list[str],
-    messages: list[ChatMessage]
+    messages: list[ChatMessage],
+    model: str
 ) -> str:
     logger.info("Calling llama-server")
     logger.debug(f"User message: {user_message}")
@@ -124,7 +125,7 @@ User question:
         "content": final_user_prompt
     })
     payload = {
-        "model": "gemma4:e2b",
+        "model": model,
         "messages": conversation,
         "temperature": 0.7,
         "stream": False
@@ -219,7 +220,8 @@ def chat(request: ChatRequest):
         answer = call_gemma(
             request.message,
             context_chunks,
-            request.messages
+            request.messages,
+            request.model
         )
 
         return {
@@ -246,9 +248,29 @@ def debug_from_frontend(request: DebugRequest):
         "message": "Debug message logged"
     }
 
+@app.get("/models")
+def list_models():
+    response = requests.get(
+        f"{OLLAMA_HOST}/api/tags",
+        timeout=10
+    )
+
+    response.raise_for_status()
+
+    data = response.json()
+
+    return {
+        "default_model": DEFAULT_OLLAMA_MODEL,
+        "models": [
+            model["name"]
+            for model in data.get("models", [])
+        ]
+    }
+
 
 app.mount(
     "/",
     StaticFiles(directory="static", html=True),
     name="static"
 )
+
