@@ -951,10 +951,25 @@
     function renderPendingFiles() {
       pendingFilesDiv.innerHTML = "";
 
-      pendingFiles.forEach(file => {
+      pendingFiles.forEach((file, index) => {
         const item = document.createElement("div");
         item.className = "pending-file";
-        item.textContent = file.name;
+
+        const fileName = document.createElement("span");
+        fileName.textContent = file.name;
+
+        const removeButton = document.createElement("button");
+        removeButton.className = "remove-file";
+        removeButton.textContent = "✕";
+
+        removeButton.onclick = () => {
+          pendingFiles.splice(index, 1);
+          renderPendingFiles();
+        };
+
+        item.appendChild(fileName);
+        item.appendChild(removeButton);
+
         pendingFilesDiv.appendChild(item);
       });
     }
