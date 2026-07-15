@@ -2,6 +2,7 @@ from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
+from pymongo import MongoClient
 
 from pathlib import Path
 import shutil
@@ -12,10 +13,16 @@ from rag import retrieve_context
 from ingest import ingest_file
 from debug_logger import get_logger
 from config import DOCS_DIR, ALLOWED_EXTENSIONS
+import uuid
 
 logger = get_logger(__name__)
 
 LLAMA_SERVER_URL = "http://127.0.0.1:11434/v1/chat/completions"
+MONGO_URI = "mongodb://localhost:27017"
+
+mongo_client = MongoClient(MONGO_URI)
+db = mongo_client["rag_database"]
+users_collection = db["users"]
 
 app = FastAPI()
 
@@ -45,6 +52,14 @@ class DebugRequest(BaseModel):
     message: str
     data: dict = {}
 
+class SignupRequest(BaseModel):
+    username: str
+    password: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 def call_gemma(
     user_message: str,
@@ -265,8 +280,60 @@ def list_models():
             model["name"]
             for model in data.get("models", [])
         ]
+    };
+
+
+@app.post("/signup")
+def signup(request: SignupRequest):
+    username = request.username.strip().lower()
+    password = request.password
+
+    existing_user = users_collection.find_one({
+        "username": username
+    })
+
+    if existing_user:
+        return {
+            "success": False,
+            "error": "Username already exists"
+        }
+
+    user_id = str(uuid.uuid4())
+
+    users_collection.insert_one({
+        "user_id": user_id,
+        "username": username,
+        "password": password
+    })
+
+    return {
+        "success": True,
+        "user_id": user_id,
+        "username": username
     }
 
+
+@app.post("/login")
+def login(request: LoginRequest):
+    username = request.username.strip().lower()
+    password = request.password
+
+    user = users_collection.find_one({
+        "username": username,
+        "password": password
+    })
+
+    if not user:
+        return {
+            "success": False,
+            "error": "Invalid username or password"
+        }
+
+    return {
+        "success": True,
+        "user_id": user["user_id"],
+        "username": user["username"]
+    }
 
 app.mount(
     "/",

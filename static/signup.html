@@ -182,8 +182,10 @@
       errorBox.style.display = "block";
     }
 
-    signupForm.addEventListener("submit", function(event) {
+    signupForm.addEventListener("submit", async function(event) {
       event.preventDefault();
+
+      errorBox.style.display = "none";
 
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
@@ -194,30 +196,44 @@
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem("local_mind_users")) || [];
+      try {
+        const response = await fetch("/signup", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username,
+            password
+          })
+        });
 
-      const usernameTaken = users.some(account =>
-        account.username === username
-      );
+        const data = await response.json();
 
-      if (usernameTaken) {
-        showError("That username already exists.");
-        return;
+        if (!response.ok || !data.success) {
+          showError(data.error || "Could not create account.");
+          return;
+        }
+
+        localStorage.setItem(
+          "current_user",
+          JSON.stringify({
+            user_id: data.user_id,
+            username: data.username
+          })
+        );
+
+        localStorage.setItem(
+          "user_id",
+          data.user_id
+        );
+
+        window.location.href = "./index.html";
+
+      } catch (err) {
+        console.error(err);
+        showError("Unable to connect to the server.");
       }
-
-      users.push({ username, password });
-
-      localStorage.setItem(
-        "local_mind_users",
-        JSON.stringify(users)
-      );
-
-      localStorage.setItem(
-        "current_user",
-        JSON.stringify({ username })
-      );
-
-      window.location.href = "./index.html";
     });
   </script>
 </body>

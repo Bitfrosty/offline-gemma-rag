@@ -181,43 +181,55 @@
       errorBox.style.display = "block";
     }
 
-    loginForm.addEventListener("submit", function(event) {
+    loginForm.addEventListener("submit", async function(event) {
       event.preventDefault();
-      console.log("Starting login...");
+
+      errorBox.style.display = "none";
 
       const username = document.getElementById("username").value.trim();
       const password = document.getElementById("password").value;
 
-      const users = JSON.parse(localStorage.getItem("local_mind_users")) || [];
+      try {
+        const response = await fetch("/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            username,
+            password
+          })
+        });
 
-      console.log("Finding account");
-      const user = users.find(account =>
-        account.username === username &&
-        account.password === password
-      );
+        const data = await response.json();
+        console.log("Login response:", data);
 
-      if (!user) {
-        showError("Invalid username or password.");
-        return;
+        if (!response.ok || !data.success) {
+          showError(data.error || "Invalid username or password.");
+          return;
+        }
+
+        // Save logged in user
+        localStorage.setItem(
+          "current_user",
+          JSON.stringify({
+            user_id: data.user_id,
+            username: data.username
+          })
+        );
+
+        // Optional: keep this for backwards compatibility
+        localStorage.setItem(
+          "user_id",
+          data.user_id
+        );
+
+        window.location.href = "./index.html";
+
+      } catch (err) {
+        console.error(err);
+        showError("Unable to connect to the server.");
       }
-
-      console.log("Setting user");
-
-      // Store the logged-in user object used by index.html's first auth check.
-      localStorage.setItem(
-        "current_user",
-        JSON.stringify({ username: user.username })
-      );
-
-      // Store the user_id key that index.html expects later.
-      // If the signup flow created a real id, use it; otherwise fall back to username.
-      localStorage.setItem(
-        "user_id",
-        user.id || user.username
-      );
-
-      console.log("Login successful");
-      window.location.href = "./index.html";
     });
   </script>
 </body>

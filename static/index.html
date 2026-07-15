@@ -22,12 +22,78 @@
       localStorage.getItem("current_user")
     );
 
-    if (!loggedInUser || !loggedInUser.username) {
+    if (!loggedInUser || !loggedInUser.user_id) {
       window.location.href = "./login.html";
     }
   </script>
 
+  <script>
+    const savedTheme =
+      localStorage.getItem("local_mind_theme");
+
+    const preferredTheme =
+      window.matchMedia("(prefers-color-scheme: light)").matches
+        ? "light"
+        : "dark";
+
+    document.documentElement.dataset.theme =
+      savedTheme || preferredTheme;
+  </script>
+
   <style>
+
+    :root {
+      color-scheme: dark;
+
+      --page-background: var(--page-background);
+      --sidebar-background: var(--sidebar-background);
+      --panel-background: var(--panel-background);
+      --panel-hover: #3a3a3a;
+      --panel-active: #343434;
+
+      --primary-text: #ececec;
+      --secondary-text: #cfcfcf;
+      --muted-text: #aaaaaa;
+
+      --border-color: #444444;
+      --subtle-border: #2f2f2f;
+
+      --input-background: var(--panel-background);
+      --code-background: #111111;
+
+      --button-background: #ffffff;
+      --button-text: #000000;
+
+      --accent-color: #19a37f;
+      --drag-background: var(--drag-background);
+    }
+
+    :root[data-theme="light"] {
+      color-scheme: light;
+
+      --page-background: #f7f7f8;
+      --sidebar-background: #ececf1;
+      --panel-background: #ffffff;
+      --panel-hover: #e3e3e8;
+      --panel-active: #d9d9df;
+
+      --primary-text: #202123;
+      --secondary-text: #444654;
+      --muted-text: #6e6e80;
+
+      --border-color: #c5c5d2;
+      --subtle-border: #d9d9e3;
+
+      --input-background: #ffffff;
+      --code-background: #eeeeee;
+
+      --button-background: #202123;
+      --button-text: #ffffff;
+
+      --accent-color: #12866c;
+      --drag-background: #dff5ed;
+    }
+
 
     * {
       box-sizing: border-box;
@@ -36,8 +102,8 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      background: #212121;
-      color: #ececec;
+      background: var(--page-background);
+      color: var(--primary-text);
       height: 100vh;
       display: flex;
       overflow: hidden;
@@ -45,17 +111,17 @@
 
     .sidebar {
       width: 260px;
-      background: #171717;
-      border-right: 1px solid #2f2f2f;
+      background: var(--sidebar-background);
+      border-right: 1px solid var(--subtle-border);
       display: flex;
       flex-direction: column;
       padding: 12px;
     }
 
     .new-chat {
-      background: #2f2f2f;
-      color: white;
-      border: 1px solid #444;
+      background: var(--panel-background);
+      color: var(--primary-text);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 12px;
       cursor: pointer;
@@ -65,7 +131,7 @@
     }
 
     .new-chat:hover {
-      background: #3a3a3a;
+      background: var(--panel-hover);
     }
 
     .chat-list {
@@ -77,7 +143,7 @@
       padding: 10px;
       border-radius: 8px;
       cursor: pointer;
-      color: #d0d0d0;
+      color: var(--secondary-text);
       font-size: 14px;
       margin-bottom: 4px;
 
@@ -88,12 +154,12 @@
     }
 
     .chat-item:hover {
-      background: #2a2a2a;
+      background: var(--panel-hover);
     }
 
     .chat-item.active {
-      background: #343434;
-      color: white;
+      background: var(--panel-active);
+      color: var(--primary-text);
     }
 
     .chat-title {
@@ -105,7 +171,7 @@
 
     .delete-chat {
       background: transparent;
-      color: #aaa;
+      color: var(--muted-text);
       border: none;
       cursor: pointer;
       font-size: 16px;
@@ -115,8 +181,8 @@
     }
 
     .delete-chat:hover {
-      background: #444;
-      color: white;
+      background: var(--panel-background);
+      color: var(--primary-text);
     }
 
     .main {
@@ -128,12 +194,12 @@
 
     .header {
       height: 56px;
-      border-bottom: 1px solid #2f2f2f;
+      border-bottom: 1px solid var(--subtle-border);
       display: flex;
       align-items: center;
       padding: 0 20px;
       font-weight: bold;
-      background: #212121;
+      background: var(--page-background);
     }
 
     .messages {
@@ -167,7 +233,7 @@
 
       font-size: 11px;
       font-weight: bold;
-      color: white;
+      color: var(--primary-text);
       flex-shrink: 0;
     }
 
@@ -199,18 +265,18 @@
     }
 
     .content code {
-      background: #2f2f2f;
+      background: var(--panel-background);
       padding: 2px 5px;
       border-radius: 4px;
       font-family: Consolas, monospace;
     }
 
     .content pre {
-      background: #111;
+      background: var(--code-background);
       padding: 14px;
       border-radius: 8px;
       overflow-x: auto;
-      border: 1px solid #333;
+      border: 1px solid var(--border-color);
     }
 
     .content pre code {
@@ -222,7 +288,7 @@
       border-left: 4px solid #666;
       margin: 10px 0;
       padding-left: 12px;
-      color: #cfcfcf;
+      color: var(--secondary-text);
     }
 
     .content ul,
@@ -232,15 +298,15 @@
 
     .input-area {
       padding: 18px 24px 24px;
-      border-top: 1px solid #2f2f2f;
-      background: #212121;
+      border-top: 1px solid var(--subtle-border);
+      background: var(--page-background);
     }
 
     .input-wrapper {
       max-width: 850px;
       margin: 0 auto;
-      background: #2f2f2f;
-      border: 1px solid #444;
+      background: var(--panel-background);
+      border: 1px solid var(--border-color);
       border-radius: 14px;
       display: flex;
       align-items: flex-end;
@@ -249,20 +315,20 @@
     }
 
     .input-wrapper.drag-over {
-      border-color: #19a37f;
-      background: #263f37;
+      border-color: var(--accent-color);
+      background: var(--drag-background);
     }
 
     .pending-files {
       max-width: 850px;
       margin: 8px auto 0;
-      color: #aaa;
+      color: var(--muted-text);
       font-size: 13px;
     }
 
     .pending-file {
-      background: #2f2f2f;
-      border: 1px solid #444;
+      background: var(--panel-background);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 6px 10px;
       margin-top: 6px;
@@ -274,7 +340,7 @@
       border: none;
       outline: none;
       background: transparent;
-      color: white;
+      color: var(--primary-text);
       font-size: 15px;
       max-height: 180px;
       min-height: 24px;
@@ -282,9 +348,14 @@
       font-family: Arial, sans-serif;
     }
 
+
+    textarea::placeholder {
+      color: var(--muted-text);
+    }
+
     button.send {
-      background: white;
-      color: black;
+      background: var(--button-background);
+      color: var(--button-text);
       border: none;
       border-radius: 8px;
       padding: 8px 12px;
@@ -298,8 +369,8 @@
     }
 
     button.upload {
-      background: #444;
-      color: white;
+      background: var(--panel-background);
+      color: var(--primary-text);
       border: none;
       border-radius: 8px;
       width: 38px;
@@ -310,8 +381,46 @@
       flex-shrink: 0;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .model-label {
+      color: var(--secondary-text);
+      font-size: 13px;
+      font-weight: normal;
+    }
+
+    .model-select {
+      min-width: 180px;
+      max-width: 300px;
+      background: var(--panel-background);
+      color: var(--primary-text);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .model-select:hover {
+      background: var(--panel-hover);
+    }
+
+    .model-select:focus {
+      border-color: var(--accent-color);
+    }
+
+    .model-select:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+
     button.upload:hover {
-      background: #555;
+      background: var(--panel-hover);
     }
 
     .empty-state {
@@ -319,7 +428,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #aaa;
+      color: var(--muted-text);
       font-size: 24px;
       text-align: center;
     }
@@ -335,20 +444,34 @@
       gap: 12px;
       font-size: 14px;
       font-weight: normal;
-      color: #cfcfcf;
+      color: var(--secondary-text);
+    }
+
+
+    .theme-button {
+      background: var(--panel-background);
+      color: var(--primary-text);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+    }
+
+    .theme-button:hover {
+      background: var(--panel-hover);
     }
 
     .logout-button {
-      background: #2f2f2f;
-      color: white;
-      border: 1px solid #444;
+      background: var(--panel-background);
+      color: var(--primary-text);
+      border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 8px 10px;
       cursor: pointer;
     }
 
     .logout-button:hover {
-      background: #3a3a3a;
+      background: var(--panel-hover);
     }
 
     @media (max-width: 700px) {
@@ -386,10 +509,30 @@
   <main class="main">
 
     <div class="header">
-      <span>Local MIND</span>
+      <div class="header-left">
+        <span>Local MIND</span>
+
+        <label for="modelSelect" class="model-label">
+          Model:
+        </label>
+
+        <select id="modelSelect" class="model-select">
+          <option value="">Loading models...</option>
+        </select>
+      </div>
 
       <div class="user-menu">
         <span id="currentUsername"></span>
+
+        <button
+          id="themeButton"
+          class="theme-button"
+          onclick="toggleTheme()"
+          title="Switch color theme"
+        >
+          Light mode
+        </button>
+
         <button
           class="logout-button"
           onclick="logout()"
@@ -465,9 +608,68 @@
     document.getElementById("currentUsername").textContent =
       currentUser.username;
 
-    function logout() {
 
+    const themeButton =
+      document.getElementById("themeButton");
+
+    function getCurrentTheme() {
+      return document.documentElement.dataset.theme || "dark";
+    }
+
+    function updateThemeButton() {
+      const currentTheme = getCurrentTheme();
+
+      themeButton.textContent =
+        currentTheme === "dark"
+          ? "Light mode"
+          : "Dark mode";
+    }
+
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+
+      localStorage.setItem(
+        "local_mind_theme",
+        theme
+      );
+
+      updateThemeButton();
+    }
+
+    function toggleTheme() {
+      const nextTheme =
+        getCurrentTheme() === "dark"
+          ? "light"
+          : "dark";
+
+      setTheme(nextTheme);
+    }
+
+    const systemTheme =
+      window.matchMedia("(prefers-color-scheme: light)");
+
+    systemTheme.addEventListener(
+      "change",
+      function(event) {
+        const savedTheme =
+          localStorage.getItem("local_mind_theme");
+
+        if (savedTheme) {
+          return;
+        }
+
+        document.documentElement.dataset.theme =
+          event.matches ? "light" : "dark";
+
+        updateThemeButton();
+      }
+    );
+
+    updateThemeButton();
+
+    function logout() {
       localStorage.removeItem("current_user");
+      localStorage.removeItem("user_id");
 
       window.location.href = "./login.html";
     }
@@ -480,11 +682,97 @@
 
     const API_URL = "/chat";
     const UPLOAD_URL = "/upload";
+    const MODELS_URL = "/models";
+
+    const modelSelect =
+      document.getElementById("modelSelect");
+
+    async function loadModels() {
+      modelSelect.disabled = true;
+      modelSelect.innerHTML =
+        `<option value="">Loading models...</option>`;
+
+      try {
+        const response = await fetch(MODELS_URL);
+
+        if (!response.ok) {
+          throw new Error(
+            `Server returned ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
+        modelSelect.innerHTML = "";
+
+        if (!data.models || data.models.length === 0) {
+          modelSelect.innerHTML =
+            `<option value="">No models installed</option>`;
+
+          return;
+        }
+
+        const savedModel =
+          localStorage.getItem("selected_ollama_model");
+
+        data.models.forEach(modelName => {
+          const option =
+            document.createElement("option");
+
+          option.value = modelName;
+          option.textContent = modelName;
+
+          modelSelect.appendChild(option);
+        });
+
+        if (
+          savedModel &&
+          data.models.includes(savedModel)
+        ) {
+          modelSelect.value = savedModel;
+        }
+        else if (
+          data.default_model &&
+          data.models.includes(data.default_model)
+        ) {
+          modelSelect.value = data.default_model;
+        }
+        else {
+          modelSelect.value = data.models[0];
+        }
+
+        localStorage.setItem(
+          "selected_ollama_model",
+          modelSelect.value
+        );
+
+      } catch (error) {
+        console.error(
+          "Could not load Ollama models:",
+          error
+        );
+
+        modelSelect.innerHTML =
+          `<option value="">Models unavailable</option>`;
+      } finally {
+        modelSelect.disabled = false;
+      }
+    }
+
+    modelSelect.addEventListener(
+      "change",
+      function() {
+        localStorage.setItem(
+          "selected_ollama_model",
+          modelSelect.value
+        );
+      }
+    );
 
     const fileInput =
       document.getElementById("fileInput");
 
-    const currentUserId = localStorage.getItem("user_id");
+    const currentUserId = currentUser.user_id;
 
     if (!currentUserId) {
       window.location.href = "./login.html";
@@ -790,6 +1078,11 @@
 
       if (!text) return;
 
+      if (!modelSelect.value) {
+        alert("No Ollama model is available.");
+        return;
+      }
+
       let chat =
         getActiveChat();
 
@@ -842,9 +1135,10 @@
             },
 
             body: JSON.stringify({
-              user_id: localStorage.getItem("user_id"),
+              user_id: currentUserId,
               chat_id: chat.id,
               message: text,
+              model: modelSelect.value,
               messages: chat.messages
             })
           });
@@ -1007,7 +1301,7 @@
           const formData = new FormData();
 
           formData.append("file", file);
-          formData.append("user_id", localStorage.getItem("user_id"));
+          formData.append("user_id", currentUserId);
           formData.append("chat_id", chat.id);
 
           const response = await fetch(UPLOAD_URL, {
@@ -1074,6 +1368,8 @@
 
       return marked.parse(markdown);
     }
+
+    loadModels();
 
     if (chats.length === 0) {
 
