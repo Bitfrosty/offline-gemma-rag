@@ -674,12 +674,6 @@
       window.location.href = "./login.html";
     }
 
-    const CHAT_STORAGE_KEY =
-      `offline_chats_${currentUser.username}`;
-
-    const ACTIVE_CHAT_STORAGE_KEY =
-      `active_chat_id_${currentUser.username}`;
-
     const API_URL = "/chat";
     const UPLOAD_URL = "/upload";
     const MODELS_URL = "/models";
@@ -778,15 +772,10 @@
       window.location.href = "./login.html";
     }
 
-    let chats =
-      JSON.parse(
-        localStorage.getItem(`offline_chats_${currentUserId}`)
-      ) || [];
+    let chats = [];
+    let activeChatId = null;
 
-    let activeChatId =
-      localStorage.getItem(
-        ACTIVE_CHAT_STORAGE_KEY
-      );
+    const CHATS_URL = "/chats";
 
     const messagesDiv =
       document.getElementById("messages");
@@ -800,31 +789,97 @@
     const sendButton =
       document.getElementById("sendButton");
 
-    function saveChats() {
+    async function saveChat(chat) {
+      if (!chat) {
+        return;
+      }
 
-      localStorage.setItem(
-        `offline_chats_${currentUserId}`,
-        JSON.stringify(chats)
-      );
+      try {
+        const response = await fetch(
+          `${CHATS_URL}/${encodeURIComponent(chat.id)}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              user_id: currentUserId,
+              chat_id: chat.id,
+              title: chat.title,
+              messages: chat.messages
+            })
+          }
+        );
 
-      localStorage.setItem(
-        `active_chat_id_${currentUserId}`,
-        activeChatId
-      );
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.error || "Could not save chat"
+          );
+        }
+
+      } catch (error) {
+        console.error(
+          "Failed to save chat:",
+          error
+        );
+      }
     }
-    function createNewChat() {
 
+    async function loadChats() {
+      try {
+        const response = await fetch(
+          `${CHATS_URL}/${encodeURIComponent(currentUserId)}`
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.error || "Could not load chats"
+          );
+        }
+
+        chats = data.chats.map(chat => ({
+          id: chat.chat_id,
+          title: chat.title || "New Chat",
+          messages: Array.isArray(chat.messages)
+            ? chat.messages
+            : []
+        }));
+
+        if (chats.length === 0) {
+          await createNewChat();
+          return;
+        }
+
+        activeChatId = chats[0].id;
+
+        renderChatList();
+        renderMessages();
+
+      } catch (error) {
+        console.error(
+          "Failed to load chats:",
+          error
+        );
+
+        chats = [];
+        await createNewChat();
+      }
+    }
+    async function createNewChat() {
       const chat = {
-        id: Date.now().toString() + "-" + Math.random().toString(36).slice(2),
+        id: crypto.randomUUID(),
         title: "New Chat",
         messages: []
       };
 
       chats.unshift(chat);
-
       activeChatId = chat.id;
 
-      saveChats();
+      await saveChat(chat);
 
       renderChatList();
       renderMessages();
@@ -845,19 +900,14 @@
         chat => chat.id === activeChatId
       );
     }
-
     function selectChat(id) {
-
       activeChatId = id;
-
-      saveChats();
 
       renderChatList();
       renderMessages();
     }
 
-    function deleteChat(id) {
-
+    async function deleteChat(id) {
       const shouldDelete =
         confirm("Delete this chat?");
 
@@ -865,29 +915,55 @@
         return;
       }
 
-      chats = chats.filter(
-        chat => chat.id !== id
-      );
+      try {
+        const response = await fetch(
+          `${CHATS_URL}/${encodeURIComponent(id)}`,
+          {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              user_id: currentUserId
+            })
+          }
+        );
 
-      if (activeChatId === id) {
+        const data = await response.json();
 
-        if (chats.length > 0) {
-          activeChatId = chats[0].id;
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.error || "Could not delete chat"
+          );
         }
-        else {
 
-          activeChatId = null;
+        chats = chats.filter(
+          chat => chat.id !== id
+        );
 
-          createNewChat();
+        if (activeChatId === id) {
+          activeChatId =
+            chats.length > 0
+              ? chats[0].id
+              : null;
+        }
 
+        if (chats.length === 0) {
+          await createNewChat();
           return;
         }
+
+        renderChatList();
+        renderMessages();
+
+      } catch (error) {
+        console.error(
+          "Failed to delete chat:",
+          error
+        );
+
+        alert("Could not delete the chat.");
       }
-
-      saveChats();
-
-      renderChatList();
-      renderMessages();
     }
 
     function renderChatList() {
@@ -1109,7 +1185,7 @@
 
       autoResizeTextarea();
 
-      saveChats();
+      await saveChats(chat);
 
       renderChatList();
       renderMessages();
@@ -1165,7 +1241,7 @@
         assistantContent.innerHTML =
           parseMarkdown(reply);
 
-        saveChats();
+        await saveChats(chat);
 
       } catch (error) {
 
@@ -1180,7 +1256,7 @@
           content: errorMessage
         });
 
-        saveChats();
+        await saveChats(chat);
       } finally {
 
         sendButton.disabled = false;
@@ -1342,7 +1418,7 @@
 
         pendingFiles = [];
         renderPendingFiles();
-        saveChats();
+        await saveChats(chat);
 
       } catch (error) {
 
@@ -1357,7 +1433,7 @@
           content: errorMessage
         });
 
-        saveChats();
+        await saveChats(chat);
 
       } finally {
         scrollToBottom();
@@ -1369,26 +1445,12 @@
       return marked.parse(markdown);
     }
 
-    loadModels();
-
-    if (chats.length === 0) {
-
-      createNewChat();
-
-    } else {
-
-      if (
-        !activeChatId ||
-        !getActiveChat()
-      ) {
-
-        activeChatId =
-          chats[0].id;
-      }
-
-      renderChatList();
-      renderMessages();
+    async function initializeApp() {
+      await loadModels();
+      await loadChats();
     }
+
+    initializeApp();
 
   </script>
 

@@ -13,6 +13,8 @@ from rag import retrieve_context
 from ingest import ingest_file
 from debug_logger import get_logger
 from config import DOCS_DIR, ALLOWED_EXTENSIONS
+from datetime import datetime, timezone
+from pwdlib import PasswordHash
 import uuid
 
 logger = get_logger(__name__)
@@ -23,6 +25,7 @@ MONGO_URI = "mongodb://localhost:27017"
 mongo_client = MongoClient(MONGO_URI)
 db = mongo_client["rag_database"]
 users_collection = db["users"]
+password_hash = PasswordHash.recommended()
 
 app = FastAPI()
 
@@ -60,6 +63,21 @@ class SignupRequest(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class StoredChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class SaveChatRequest(BaseModel):
+    user_id: str
+    chat_id: str
+    title: str
+    messages: list[StoredChatMessage]
+
+
+class DeleteChatRequest(BaseModel):
+    user_id: str
 
 def call_gemma(
     user_message: str,
@@ -288,6 +306,18 @@ def signup(request: SignupRequest):
     username = request.username.strip().lower()
     password = request.password
 
+    if len(username) < 3:
+        return {
+            "success": False,
+            "error": "Username must be at least 3 characters"
+        }
+
+    if len(password) < 4:
+        return {
+            "success": False,
+            "error": "Password must be at least 4 characters"
+        }
+
     existing_user = users_collection.find_one({
         "username": username
     })
@@ -303,7 +333,8 @@ def signup(request: SignupRequest):
     users_collection.insert_one({
         "user_id": user_id,
         "username": username,
-        "password": password
+        "password_hash": password_hash.hash(password),
+        "created_at": datetime.now(timezone.utc)
     })
 
     return {
@@ -319,11 +350,35 @@ def login(request: LoginRequest):
     password = request.password
 
     user = users_collection.find_one({
-        "username": username,
-        "password": password
+        "username": username
     })
 
     if not user:
+        return {
+            "success": False,
+            "error": "Invalid username or password"
+        }
+
+    stored_hash = user.get("password_hash")
+
+    if not stored_hash:
+        return {
+            "success": False,
+            "error": (
+                "This account uses the old password format. "
+                "Create the account again or migrate its password."
+            )
+        }
+
+    try:
+        password_is_valid = password_hash.verify(
+            password,
+            stored_hash
+        )
+    except Exception:
+        password_is_valid = False
+
+    if not password_is_valid:
         return {
             "success": False,
             "error": "Invalid username or password"
@@ -334,6 +389,109 @@ def login(request: LoginRequest):
         "user_id": user["user_id"],
         "username": user["username"]
     }
+
+@app.get("/chats/{user_id}")
+def get_chats(user_id: str):
+    try:
+        cursor = chats_collection.find(
+            {"user_id": user_id},
+            {"_id": 0}
+        ).sort("updated_at", -1)
+
+        return {
+            "success": True,
+            "chats": list(cursor)
+        }
+
+    except Exception as error:
+        logger.exception(
+            f"Could not load chats for user {user_id}"
+        )
+
+        return {
+            "success": False,
+            "error": str(error),
+            "chats": []
+        }
+
+
+@app.put("/chats/{chat_id}")
+def save_chat(
+    chat_id: str,
+    request: SaveChatRequest
+):
+    try:
+        if request.chat_id != chat_id:
+            return {
+                "success": False,
+                "error": "Chat ID does not match request URL"
+            }
+
+        chat_document = {
+            "user_id": request.user_id,
+            "chat_id": request.chat_id,
+            "title": request.title,
+            "messages": [
+                message.model_dump()
+                for message in request.messages
+            ],
+            "updated_at": datetime.now(timezone.utc)
+        }
+
+        chats_collection.update_one(
+            {
+                "user_id": request.user_id,
+                "chat_id": chat_id
+            },
+            {
+                "$set": chat_document,
+                "$setOnInsert": {
+                    "created_at": datetime.now(timezone.utc)
+                }
+            },
+            upsert=True
+        )
+
+        return {
+            "success": True
+        }
+
+    except Exception as error:
+        logger.exception(
+            f"Could not save chat {chat_id}"
+        )
+
+        return {
+            "success": False,
+            "error": str(error)
+        }
+
+
+@app.delete("/chats/{chat_id}")
+def delete_chat(
+    chat_id: str,
+    request: DeleteChatRequest
+):
+    try:
+        result = chats_collection.delete_one({
+            "user_id": request.user_id,
+            "chat_id": chat_id
+        })
+
+        return {
+            "success": True,
+            "deleted": result.deleted_count > 0
+        }
+
+    except Exception as error:
+        logger.exception(
+            f"Could not delete chat {chat_id}"
+        )
+
+        return {
+            "success": False,
+            "error": str(error)
+        }
 
 app.mount(
     "/",

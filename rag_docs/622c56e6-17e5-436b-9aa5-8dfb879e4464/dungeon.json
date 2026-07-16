@@ -1,0 +1,121 @@
+{
+  "startRoomId": "entrance",
+  "rooms": [
+    {
+      "id": "entrance",
+      "name": "Prison Entrance",
+      "description": "A cracked stairway descends into the ancient underground prison.",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "connections": {
+        "north": "guard_hall",
+        "east": "storage_cell"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "The stone door seals shut behind you. Somewhere below, an escape tunnel waits."
+        }
+      ]
+    },
+    {
+      "id": "guard_hall",
+      "name": "Guard Hall",
+      "description": "Rusty chains hang from the walls where skeletal guards still patrol.",
+      "position": {
+        "x": 0,
+        "y": 1
+      },
+      "connections": {
+        "south": "entrance",
+        "east": "warden_chamber",
+        "west": "bone_pit"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "skeleton_guard"
+        }
+      ]
+    },
+    {
+      "id": "storage_cell",
+      "name": "Storage Cell",
+      "description": "Broken crates and forgotten supplies fill this damp prison cell.",
+      "position": {
+        "x": 1,
+        "y": 0
+      },
+      "connections": {
+        "west": "entrance",
+        "north": "warden_chamber"
+      },
+      "events": [
+        {
+          "type": "Treasure",
+          "data": "rusted_key"
+        }
+      ]
+    },
+    {
+      "id": "bone_pit",
+      "name": "Bone Pit",
+      "description": "A pit of old bones covers the floor, hiding pressure plates beneath.",
+      "position": {
+        "x": -1,
+        "y": 1
+      },
+      "connections": {
+        "east": "guard_hall",
+        "north": "exit"
+      },
+      "events": [
+        {
+          "type": "Trap",
+          "data": "10"
+        }
+      ]
+    },
+    {
+      "id": "warden_chamber",
+      "name": "Warden Chamber",
+      "description": "The ruined office of the prison warden contains a passage carved behind a shelf.",
+      "position": {
+        "x": 1,
+        "y": 1
+      },
+      "connections": {
+        "west": "guard_hall",
+        "south": "storage_cell",
+        "north": "exit"
+      },
+      "events": [
+        {
+          "type": "Enemy",
+          "data": "skeleton_warden"
+        }
+      ]
+    },
+    {
+      "id": "exit",
+      "name": "Hidden Escape Tunnel",
+      "description": "A narrow tunnel leads upward toward cold night air and freedom.",
+      "position": {
+        "x": 0,
+        "y": 2
+      },
+      "connections": {
+        "south": "bone_pit",
+        "east": "warden_chamber"
+      },
+      "events": [
+        {
+          "type": "Dialogue",
+          "data": "You crawl through the hidden escape tunnel and leave the prison behind."
+        }
+      ]
+    }
+  ]
+}
