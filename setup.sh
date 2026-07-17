@@ -53,7 +53,8 @@ else
         requests \
         pymongo \
         numpy \
-        python-multipart
+        python-multipart \
+		pwdlib[argon2]
 fi
 
 echo "Setup complete."
