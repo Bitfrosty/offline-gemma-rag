@@ -811,11 +811,23 @@
           }
         );
 
-        const data = await response.json();
+        const responseText = await response.text();
+
+        let data = {};
+
+        try {
+          data = responseText
+            ? JSON.parse(responseText)
+            : {};
+        } catch {
+          throw new Error(
+            `Invalid server response (${response.status}): ${responseText}`
+          );
+        }
 
         if (!response.ok || !data.success) {
           throw new Error(
-            data.error || "Could not save chat"
+            data.error || `Could not save chat (${response.status})`
           );
         }
 
@@ -869,9 +881,24 @@
         await createNewChat();
       }
     }
+    function generateChatId() {
+      if (
+        window.crypto &&
+        typeof window.crypto.randomUUID === "function"
+      ) {
+        return window.crypto.randomUUID();
+      }
+
+      return (
+        Date.now().toString(36) +
+        "-" +
+        Math.random().toString(36).substring(2, 10)
+      );
+    }
+
     async function createNewChat() {
       const chat = {
-        id: crypto.randomUUID(),
+        id: generateChatId(),
         title: "New Chat",
         messages: []
       };
@@ -879,10 +906,12 @@
       chats.unshift(chat);
       activeChatId = chat.id;
 
-      await saveChat(chat);
-
       renderChatList();
       renderMessages();
+
+      await saveChat(chat);
+
+      return chat;
     }
 
     async function handleSend() {
@@ -1142,7 +1171,7 @@
 
           event.preventDefault();
 
-          sendMessage();
+          handleSend();
         }
       }
     );
@@ -1163,13 +1192,8 @@
         getActiveChat();
 
       if (!chat) {
-
-        createNewChat();
-
-        chat =
-          getActiveChat();
+        chat = await createNewChat();
       }
-
       if (chat.title === "New Chat") {
 
         chat.title =
@@ -1185,7 +1209,7 @@
 
       autoResizeTextarea();
 
-      await saveChats(chat);
+      await saveChat(chat);
 
       renderChatList();
       renderMessages();
@@ -1241,7 +1265,7 @@
         assistantContent.innerHTML =
           parseMarkdown(reply);
 
-        await saveChats(chat);
+        await saveChat(chat);
 
       } catch (error) {
 
@@ -1256,7 +1280,7 @@
           content: errorMessage
         });
 
-        await saveChats(chat);
+        await saveChat(chat);
       } finally {
 
         sendButton.disabled = false;
@@ -1353,8 +1377,7 @@
       let chat = getActiveChat();
 
       if (!chat) {
-        createNewChat();
-        chat = getActiveChat();
+        chat = await createNewChat();
       }
 
       addMessageToScreen(
@@ -1418,7 +1441,7 @@
 
         pendingFiles = [];
         renderPendingFiles();
-        await saveChats(chat);
+        await saveChat(chat);
 
       } catch (error) {
 
@@ -1433,7 +1456,7 @@
           content: errorMessage
         });
 
-        await saveChats(chat);
+        await saveChat(chat);
 
       } finally {
         scrollToBottom();
